@@ -1,6 +1,6 @@
 //CFGX[v0.1.0];KEY[Key1][ins]{打印消息并退出};ALIAS[myalias][gg];
 //VALUE[sth-to-say][hello, world!]{在公屏发一段话};
-//DESC{演示一下CFGX的格式};
+//DESC{演示一下CFGX的格式};AUTHOR{Purp1e};
 bind "[[Key1]]" "say [[sth-to-say]]; [[myalias]]"
 alias "[[myalias]]" "quit"
 

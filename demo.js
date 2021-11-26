@@ -5,12 +5,14 @@ var re_start = /\/\/CFGX\[(v\d.\d.\d)];([\s\S]*)/g
 var re_key = /KEY\[([^\[\]]+)\]\[([^\[\]]+)\](\{([^\[\]\}]+)\})?;/g
 var re_alias = /ALIAS\[([^\[\]]+)\]\[([^\[\]]+)\](\{([^\[\]\}]+)\})?;/g
 var re_value = /VALUE\[([^\[\]]+)\]\[([^\[\]]+)\](\{([^\[\]\}]+)\})?;/g
-var re_desc = /INFO\{([^\[\]\}]+)\};/g
+var re_desc = /DESC\{([^\[\]\}]+)\};/g
+var re_author = /AUTHOR\{([^\[\]\}]+)\};/g
 const file = './demo.cfgx'
+const cfg_file = './demo.cfg'
 
 // 解析块内数据
 function blockParse(block) {
-    var key = [], alias = [], value = [], desc = '', res
+    var key = [], alias = [], value = [], desc = '', author = '', res
     // 解析comment
     if (block.comment !== '') {
         // Key
@@ -30,7 +32,12 @@ function blockParse(block) {
 
         // desc
         while(res = re_desc.exec(block.comment)){
-            desc.push(res.length === 2 ? res[1]:'')
+            desc = res.length === 2 ? res[1]:''
+        }
+
+        // author
+        while(res = re_author.exec(block.comment)){
+            author = res.length === 2 ? res[1]:''
         }
     }
 
@@ -40,6 +47,7 @@ function blockParse(block) {
         "alias": alias,
         "value": value,
         "desc": desc,
+        "author": author,
         "script": block.script
     }
 }
@@ -96,14 +104,48 @@ function stringToBlocks(data) {
     return blocks
 }
 
+//由block生成cfg字符串
+function blockToString(block) {
+    var output = '//'
+                + (block.desc !== ''? block.desc + ' ': '')
+                + (block.author !== ''? '作者: ' + block.author: '')
+                + '\n'
+    for (var i of block.key) {
+        block.script = block.script.replaceAll('[['+ i.name +']]', i.value)
+        output += '// ' + i.value + ' 键 -> ' + i.info + '\n'
+    }
+    for (var i of block.alias) {
+        block.script = block.script.replaceAll('[['+ i.name +']]', i.value)
+    }
+    for (var i of block.value) {
+        block.script = block.script.replaceAll('[['+ i.name +']]', i.value)
+    }
+
+    return output + block.script
+}
+
+function generateCfg(blocks, file) {
+    var output = '//CFGX v0.1.0 自动生成\n\n'
+    for (var block of blocks) {
+        output += blockToString(block) + '\n'
+    }
+
+    //写入文件
+    fs.writeFileSync(file, output,'utf-8')
+}
 
 // 同步读取文件
 var data = fs.readFileSync(file, 'utf-8');
 var blocks = stringToBlocks(data)
 
+// 输出解析结果
+console.log('解析结果')
 for(var block of blocks){
     console.log(block)
 }
+
+// 生成CFG
+generateCfg(blocks, cfg_file)
 
 // 异步读取
 // fs.readFile(file, 'utf-8', function (err, data) {
