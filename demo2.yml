@@ -1,0 +1,30 @@
+title: cfgx示例
+cfgx_version: v0.2.0
+scripts:
+  - desc: 演示一下CFGX的格式
+    author: Purp1e
+    version: v0.0.1
+    key:
+      - name: Key1
+        value: ins
+        info: 打印消息并退出
+    alias:
+      - name: myalias
+        value: gg
+        info: ""
+    value:
+      - name: sth-to-say
+        value: hello, world!
+        info: 在公屏发一段话
+    content: |
+      bind "[[Key1]]" "say [[sth-to-say]]; [[myalias]]"
+      alias "[[myalias]]" "quit"
+
+  - desc: ""
+    author: ""
+    version: ""
+    key: []
+    alias: []
+    value: []
+    content: |
+      hello, world!
